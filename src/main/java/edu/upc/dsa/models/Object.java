@@ -16,10 +16,11 @@ public class Object {
         this.id = RandomUtils.getId();
     }
 
-    public Object(String name, String description) {
+    public Object(String name, String description, int coins) {
         this();
         this.setDescription(description);
         this.setName(name);
+        this.setDsaCoins(coins);
     }
 
     public String getId() {

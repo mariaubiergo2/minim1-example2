@@ -14,6 +14,8 @@ public interface UsersManager {
     public void deleteUser(String id);
     public User updateUser(User t);
     public User updateUserCoins(User t);
+    public List<User> sortAlpha();
+    public Object buyObject(String name);
     public int size();
 /*
     public User addUser(String id, String singer);

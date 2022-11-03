@@ -45,8 +45,23 @@ public class UserService {
 
         GenericEntity<List<User>> entity = new GenericEntity<List<User>>(users) {};
         return Response.status(201).entity(entity).build()  ;
-
     }
+
+    @GET
+    @ApiOperation(value = "get all User ordered Alphabeticaly Surname", notes = "asdasd")
+    @ApiResponses(value = {
+            @ApiResponse(code = 201, message = "Successful", response = User.class, responseContainer="List"),
+    })
+    @Path("/")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response sortAlpha() {
+
+        List<User> users = this.tm.sortAlpha();
+
+        GenericEntity<List<User>> entity = new GenericEntity<List<User>>(users) {};
+        return Response.status(201).entity(entity).build()  ;
+    }
+
 
     @GET
     @ApiOperation(value = "get a Track", notes = "asdasd")

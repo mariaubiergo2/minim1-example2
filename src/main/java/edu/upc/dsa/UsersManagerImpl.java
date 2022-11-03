@@ -2,17 +2,20 @@ package edu.upc.dsa;
 
 import edu.upc.dsa.models.User;
 
-import java.util.LinkedList;
-import java.util.List;
+import java.util.*;
+
 import org.apache.log4j.Logger;
 
 public class UsersManagerImpl implements UsersManager {
     private static UsersManager instance;
+
     protected List<User> users;
+    protected Map<User, List<Object>> usersObjectMap;
     final static Logger logger = Logger.getLogger(UsersManagerImpl.class);
 
     private UsersManagerImpl() {
         this.users = new LinkedList<>();
+        this.usersObjectMap = new HashMap<>();
     }
 
     public static UsersManager getInstance() {
@@ -79,7 +82,6 @@ public class UsersManagerImpl implements UsersManager {
     }
 
     public void deleteUser(String id) {
-
         User t = this.getUser(id);
         if (t==null) {
             logger.warn("not found " + t);
@@ -127,5 +129,17 @@ public class UsersManagerImpl implements UsersManager {
         }
 
         return t;
+    }
+
+    @Override
+    public List<User> sortAlpha() {
+        users.sort((User u1, User u2)->u1.getSurnames().compareTo(u2.getSurnames()));
+        return users;
+    }
+
+    @Override
+    public Object buyObject(String name) {
+
+        return null;
     }
 }
