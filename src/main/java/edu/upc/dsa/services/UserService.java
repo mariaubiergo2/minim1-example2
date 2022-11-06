@@ -1,8 +1,8 @@
 package edu.upc.dsa.services;
 
 
-import edu.upc.dsa.UsersManager;
-import edu.upc.dsa.UsersManagerImpl;
+import edu.upc.dsa.ShopManager;
+import edu.upc.dsa.ShopManagerImpl;
 import edu.upc.dsa.models.User;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -19,21 +19,26 @@ import java.util.List;
 @Path("/users")
 public class UserService {
 
-    private UsersManager tm;
+    private ShopManager sm;
 
     public UserService() {
-        this.tm = UsersManagerImpl.getInstance();
-        if (tm.size()==0) { //(String name, String surnames, String birthdate, String mail, String password)
-            this.tm.createUser("maria","ubiergo gomez", "avui", "meri@gmail", "gats");
-            this.tm.createUser("laia", "Luis Fonsi", "dema","lia@lalia", "gossos");
-            this.tm.createUser("Biel",  "Luis Fonsi", "desa", "aeros@love",  "gossos");
+        this.sm = ShopManagerImpl.getInstance();
+        if (sm.sizeUsers()==0) { //(String name, String surnames, String birthdate, String mail, String password)
+            this.sm.addUser("maria","ubiergo gomez", "avui", "meri@gmail", "gats");
+            this.sm.addUser("laia", "Luis Fonsi", "dema","lia@lalia", "gossos");
+            this.sm.addUser("Biel",  "Luis Fonsi", "desa", "aeros@love",  "gossos");
         }
 
+        if (sm.sizeObjectes()==0) {
+            this.sm.addObject("taula", "te potes", 50);
+            this.sm.addObject("jerro", "trencat", 2);
+            this.sm.addObject("Play", "aparell electronic", 149);
+        }
 
     }
 
     @GET
-    @ApiOperation(value = "get all User", notes = "asdasd")
+    @ApiOperation(value = "get all Users", notes = "per veure un llistat dels usuaris")
     @ApiResponses(value = {
             @ApiResponse(code = 201, message = "Successful", response = User.class, responseContainer="List"),
     })
@@ -41,14 +46,15 @@ public class UserService {
     @Produces(MediaType.APPLICATION_JSON)
     public Response getUsers() {
 
-        List<User> users = this.tm.findAll();
+        List<User> users = this.sm.findAllUsers();
 
         GenericEntity<List<User>> entity = new GenericEntity<List<User>>(users) {};
         return Response.status(201).entity(entity).build()  ;
     }
 
     @GET
-    @ApiOperation(value = "get all User ordered Alphabeticaly Surname", notes = "asdasd")
+    @ApiOperation(value = "get all User ordered Alphabeticaly Surname", notes = "En primer lloc es compararan els " +
+            "cognoms i en cas d'empat els noms")
     @ApiResponses(value = {
             @ApiResponse(code = 201, message = "Successful", response = User.class, responseContainer="List"),
     })
@@ -56,7 +62,7 @@ public class UserService {
     @Produces(MediaType.APPLICATION_JSON)
     public Response sortAlpha() {
 
-        List<User> users = this.tm.sortAlpha();
+        List<User> users = this.sm.sortAlpha();
 
         GenericEntity<List<User>> entity = new GenericEntity<List<User>>(users) {};
         return Response.status(201).entity(entity).build()  ;
@@ -64,7 +70,7 @@ public class UserService {
 
 
     @GET
-    @ApiOperation(value = "get a Track", notes = "asdasd")
+    @ApiOperation(value = "get a User", notes = "pillar info d'un user especific")
     @ApiResponses(value = {
             @ApiResponse(code = 201, message = "Successful", response = User.class),
             @ApiResponse(code = 404, message = "User not found")
@@ -72,7 +78,7 @@ public class UserService {
     @Path("/{id}")
     @Produces(MediaType.APPLICATION_JSON)
     public Response getUser(@PathParam("id") String id) {
-        User t = this.tm.getUser(id);
+        User t = this.sm.getUser(id);
         if (t == null) return Response.status(404).build();
         else  return Response.status(201).entity(t).build();
     }
@@ -85,10 +91,9 @@ public class UserService {
     })
     @Path("/{id}")
     public Response deleteUser(@PathParam("id") String id) {
-        User t = this.tm.getUser(id);
+        Integer t = this.sm.deleteUser(id);
         if (t == null) return Response.status(404).build();
-        else this.tm.deleteUser(id);
-        return Response.status(201).build();
+        else return Response.status(201).build();
     }
 
     @PUT
@@ -100,31 +105,12 @@ public class UserService {
     @Path("/")
     public Response updateUser(User user) {
 
-        User t = this.tm.updateUser(user);
+        User t = this.sm.updateUser(user);
 
         if (t == null) return Response.status(404).build();
 
         return Response.status(201).build();
     }
-
-
-    @PUT
-    @ApiOperation(value = "update a Users Coins", notes = "asdasd")
-    @ApiResponses(value = {
-            @ApiResponse(code = 201, message = "Successful"),
-            @ApiResponse(code = 404, message = "User not found")
-    })
-    @Path("/")
-    public Response updateUserCoins(User user) {
-
-        User t = this.tm.updateUserCoins(user);
-
-        if (t == null) return Response.status(404).build();
-
-        return Response.status(201).build();
-    }
-
-
 
 
     @POST
@@ -140,7 +126,7 @@ public class UserService {
     public Response addUser(User user) {
 
         if (user.getSurnames()==null || user.getName()==null)  return Response.status(500).entity(user).build();
-        if (this.tm.addUser(user)==null)
+        if (this.sm.addUser(user)==null)
             Response.status(500).entity(user).build();
         return Response.status(201).entity(user).build();
     }

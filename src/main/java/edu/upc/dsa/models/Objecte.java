@@ -2,7 +2,7 @@ package edu.upc.dsa.models;
 
 import edu.upc.dsa.util.RandomUtils;
 
-public class Object {
+public class Objecte {
 
     String id;
     String name;
@@ -12,11 +12,11 @@ public class Object {
 
     static int lastId;
 
-    public Object() {
+    public Objecte() {
         this.id = RandomUtils.getId();
     }
 
-    public Object(String name, String description, int coins) {
+    public Objecte(String name, String description, int coins) {
         this();
         this.setDescription(description);
         this.setName(name);

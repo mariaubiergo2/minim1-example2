@@ -2,24 +2,24 @@ package edu.upc.dsa.models;
 
 import edu.upc.dsa.util.RandomUtils;
 
-public class User {
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.Map;
 
-    String id;
+public class User {
+    //String id;
     String name;
     String surnames;
-
     String birthdate;
-
     String mail;
-
     String password;
-
+    LinkedList<Objecte> boughtObjectes;
     int dsaCoins;
 
     static int lastId;
 
     public User() {
-        this.id = RandomUtils.getId();
+        //this.id = RandomUtils.getId();
     }
 
     public User(String name, String surnames, String birthdate, String mail, String password) {
@@ -30,8 +30,9 @@ public class User {
         this.setMail(mail);
         this.setPassword(password);
         this.setDsaCoins(50);
+        this.boughtObjectes = new LinkedList<>();
     }
-
+/*
     public String getId() {
         return this.id;
     }
@@ -39,7 +40,7 @@ public class User {
     public void setId(String id) {
         this.id=id;
     }
-
+*/
 
     public String getName() {
         return name;
@@ -85,9 +86,28 @@ public class User {
         this.dsaCoins = p;
     }
 
-    @Override
-    public String toString() {
-        return "Track [id="+id+", name=" + name + surnames +", birth date=" + birthdate +", password=" + password +", dsaCoins=" + dsaCoins +"]";
+    public VOcredencials getCredentials() {
+        return new VOcredencials(this.getMail(), this.getPassword());
     }
 
+    public boolean buyObject(Objecte objecte){
+        if (this.dsaCoins>=objecte.getDsaCoins()){
+            this.dsaCoins=this.dsaCoins-objecte.getDsaCoins();
+            this.boughtObjectes.add(objecte);
+            return true;
+        }
+        return false;
+    }
+
+    public Integer authentification(VOcredencials credencials){
+        if (this.getMail().equals(credencials.getMail())&&this.getPassword().equals(credencials.getPass())){
+            return 0;
+        }
+        return 1;
+    }
+
+    @Override
+    public String toString() {
+        return "Track [name=" + name + surnames +", birth date=" + birthdate +", password=" + password +" mail =" + mail +", dsaCoins=" + dsaCoins +"]";
+    }
 }
