@@ -8,10 +8,11 @@ import java.util.List;
 
 public interface ShopManager {
 
-    public User addUser(String name, String surnames, String birthdate, String mail, String password);
+    public User createUser(String name, String surnames, String birthdate, String mail, String password);
     public User addUser(User t);
     public Integer getUser(VOcredencials credencials);
-    public User getUser(String id);
+    public VOcredencials getCredentials(User u);
+    public User getUser(Integer id);
     public List<User> findAllUsers();
     public Integer getUserByMail(String mail);
     public Integer deleteUser(String id);

@@ -32,7 +32,7 @@ public class ShopManagerImpl implements ShopManager {
         return instance;
     }
 
-    public User addUser(String name, String surnames, String birthdate, String mail, String password) {
+    public User createUser(String name, String surnames, String birthdate, String mail, String password) {
         return this.addUser(new User(name, surnames, birthdate, mail, password));
     }
 
@@ -74,7 +74,12 @@ public class ShopManagerImpl implements ShopManager {
     }
 
     @Override
-    public User getUser(String id) {
+    public VOcredencials getCredentials(User u) {
+        return u.getCredentials();
+    }
+
+    @Override
+    public User getUser(Integer id) {
         return this.users.get(id);
     }
 
@@ -118,9 +123,7 @@ public class ShopManagerImpl implements ShopManager {
 
     @Override
     public List<User> sortAlpha() {
-        List<User> list = this.users.values().stream()
-                .map(foo -> foo.deepCopy())
-                .collect(toCollection(LinkedList::new));
+        List<User> list = new ArrayList<>(this.users.values());
 
         list.sort((User u1, User u2)-> {
             int res = u1.getSurnames().compareToIgnoreCase(u2.getSurnames());
