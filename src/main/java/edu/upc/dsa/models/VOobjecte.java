@@ -1,37 +1,19 @@
 package edu.upc.dsa.models;
 
-import edu.upc.dsa.util.RandomUtils;
-
-public class Objecte {
+public class VOobjecte {
     String name;
     String description;
     int dsaCoins;
 
-    public Objecte() {    }
+    public VOobjecte() {    }
 
-    public Objecte(String name, String description, int coins) {
+    public VOobjecte(String name, String description, int coins) {
         this();
         this.setDescription(description);
         this.setName(name);
         this.setDsaCoins(coins);
     }
 
-    public Objecte(VOobjecte vOobjecte) {
-        this();
-        this.setDescription(vOobjecte.getDescription());
-        this.setName(vOobjecte.getDescription());
-        this.setDsaCoins(vOobjecte.getDsaCoins());
-    }
-
-/*
-    public String getId() {
-        return this.id;
-    }
-    public void setId(String id) {
-        this.id=id;
-    }
-
- */
 
     public String getName() {
         return name;
@@ -56,7 +38,7 @@ public class Objecte {
 
     @Override
     public String toString() {
-        return "Objecte [name=" + name + ", description=" + description +", dsaCoins=" + dsaCoins +"]";
+        return "VOobjecte [name=" + name + ", description=" + description +", dsaCoins=" + dsaCoins +"]";
     }
-
 }
+

@@ -1,30 +1,26 @@
 package edu.upc.dsa;
 
-import edu.upc.dsa.models.Objecte;
-import edu.upc.dsa.models.User;
+import edu.upc.dsa.models.*;
 
 import java.util.*;
 
-import edu.upc.dsa.models.VOcredencials;
 import org.apache.log4j.Logger;
 
-import static java.util.stream.Collectors.toCollection;
 import static java.util.stream.Collectors.toList;
 
 public class ShopManagerImpl implements ShopManager {
     private static ShopManager instance;
 
-    protected Map<Integer, User> users;
+    protected Map<String, User> users; //DNI
     protected List<Objecte> objectes;
 
     protected Integer idActual;
 
     final static Logger logger = Logger.getLogger(ShopManagerImpl.class);
 
-    private ShopManagerImpl() {
+    ShopManagerImpl() {
         this.users = new HashMap<>();
         this.objectes= new ArrayList<>();
-        this.idActual=0;
     }
 
     public static ShopManager getInstance() {
@@ -32,72 +28,76 @@ public class ShopManagerImpl implements ShopManager {
         return instance;
     }
 
-    public User createUser(String name, String surnames, String birthdate, String mail, String password) {
-        return this.addUser(new User(name, surnames, birthdate, mail, password));
-    }
 
-    public User addUser(User t) {
-        logger.info("new User " + t);
+    @Override
+    public User addUser(VOuser vo) {
+        logger.info("Trying to create new User: " + vo);
 
-        if (getUserByMail(t.getMail()) == null) {
-            this.idActual=this.idActual+1;
-            this.users.put(this.idActual, t);
-            logger.info("new User added");
-            return t;
+        if (getUserByMail(vo.getMail()) == null) {
+            User u = new User(vo);
+            this.users.put(vo.getDni(), u);
+            logger.info("New User added ID = "+vo.getDni());
+
+            return u;
         }
-        logger.warn("Could not add new user bc already exists user with that mail");
+        logger.warn("Could not add new User bc it already exists user with that mail");
+
         return null;
     }
 
+    public String getUser(VOcredencials credencials) {
+        logger.info("Trying to get User "+credencials);
+        
+        String iduser = getUserByMail(credencials.getMail());
+        if(iduser!=null)
+            if (this.users.get(iduser).getPassword().equals(credencials.getPass())){
+                logger.info("User Found: "+this.users.get(iduser));
+                return iduser;
+            }
 
-    public Integer getUser(VOcredencials credencials) {
-        logger.info("TryingToGetUser("+credencials+")");
+        logger.warn("User Not Found "+credencials);
+        return null;
+                
 
-        for (Map.Entry<Integer, User> entry : this.users.entrySet()) {
-            if (entry.getValue().authentification(credencials)==0){
-                logger.info("found user: "+entry.getValue());
+        /*
+        for (Map.Entry<String, User> entry : this.users.entrySet()) {
+            if (entry.getValue().autentification(credencials)==0){
+                logger.info("User Found: "+entry.getValue());
                 return entry.getKey();
             }
         }
-        logger.warn("unfound user with "+credencials);
-        return -1;
-        /*
-        this.users.entrySet().stream()
-                .filter(map -> (map.getValue().authentification(credencials)==0))
-                .map(map -> map.getKey());
-        logger.info("gotUser: "+t);
-        return t.getKey()  ,c;
-            }
-        }
-         */
-
+        */
+        
     }
 
     @Override
     public VOcredencials getCredentials(User u) {
-        return u.getCredentials();
+        return new VOcredencials(u);
+    }
+
+
+    @Override
+    public List<Objecte> getObjectes(User u) {
+        return u.getObjects();
     }
 
     @Override
-    public User getUser(Integer id) {
-        return this.users.get(id);
-    }
+    public String getUserByMail(String mail) {
+        logger.info("Trying to get User with mail "+mail);
 
-    @Override
-    public Integer getUserByMail(String mail) {
-        logger.info("Trying to Get User With Mail "+mail);
-
-        for (Map.Entry<Integer, User> entry : this.users.entrySet()) {
+        for (Map.Entry<String, User> entry : this.users.entrySet()) {
             if (entry.getValue().getMail().equals(mail)){
-                logger.info("found user: "+entry.getValue());
+                logger.info("User Found: "+entry.getValue());
+
                 return entry.getKey();
             }
         }
         logger.warn("Not found any user with "+mail);
+
         return null;
     }
 
-    public List<User> findAllUsers() {
+    public List<User> getAllUsers() {
         List<User> list = this.users.values().stream().collect(toList());
         //List<User> list = this.users.values().stream()
         //  .map(foo -> foo.deepCopy())
@@ -105,7 +105,7 @@ public class ShopManagerImpl implements ShopManager {
         return list;
     }
 
-
+/*
     @Override
     public User updateUser(User newUser) { //UN USER NO POT UPDATE LES SEVES CREDENCIALS
         Integer key = this.getUser(newUser.getCredentials());
@@ -121,6 +121,8 @@ public class ShopManagerImpl implements ShopManager {
         return null;
     }
 
+ */
+
     @Override
     public List<User> sortAlpha() {
         List<User> list = new ArrayList<>(this.users.values());
@@ -132,132 +134,135 @@ public class ShopManagerImpl implements ShopManager {
             }
             return res;
         });
+
         return list;
     }
 
     @Override
     public User logIn(VOcredencials credecinals) {
         logger.info("LOGIN: looking for "+credecinals);
-        Integer u = getUserByMail(credecinals.getMail());
+
+        String u = getUser(credecinals);
         if(u==null){
-            logger.warn("LOGIN: could not login");
+            logger.warn("Failed login");
+
             return null;
         }
-        logger.info("LOGIN: nice you are in");
+        logger.info("Successful login! Nice you are in");
+
         return users.get(u);
     }
 
     @Override
     public Object buyObject(VOcredencials credencials, String objecte) {
         Objecte lukcompro = getObject(objecte);
+
         if(lukcompro==null){
             logger.info("Invalid object");
             return null;
         }
-        Integer i = getUser(credencials);
-        if (i==-1){
+        
+        String i = getUser(credencials);
+        if (i==null){
             logger.info("Invalid user");
             return null;
         }
-        boolean compraHecha = this.users.get(i).buyObject(lukcompro);
-        if (compraHecha){
-            logger.info("Nice contribution to capitalism");
+        
+        Objecte compraHecha = this.users.get(i).buyObject(lukcompro);
+        if (compraHecha!=null){
+            logger.info("New compra hecha "+compraHecha+"\nNice contribution to capitalism");
             return lukcompro;
         }
-        logger.warn("no tenies suficients diners");
+        logger.info("No tienes suficiente saldo");
+        
         return null;
     }
 
-    public Integer deleteUser(String id) {
-        User t = this.users.get(id);
-        if (t==null) {
-            logger.warn("not found ");
-            return -1;
-        }
-        else logger.info("Deleted "+t);
 
-        this.users.remove(id);
-        return 0;
 
-    }
+
 
     public int sizeUsers() {
         int ret = this.users.size();
-        logger.info("size " + ret);
+        logger.info("There are " + ret+" users");
 
         return ret;
     }
 
     public int sizeObjectes() {
         int ret = this.objectes.size();
-        logger.info("size " + ret);
+        logger.info("There are " + ret+" objectes");
 
         return ret;
     }
 
 
     @Override
-    public Objecte addObject(String name, String description, int coins) {
-        return new Objecte(name, description, coins);
-    }
+    public Objecte addObject(Objecte vOobjecte) {
+        logger.info("Trying to create new Object " + vOobjecte);
 
-    @Override
-    public Objecte addObject(Objecte t) {
-        logger.info("new Object " + t);
+        if(getObject(vOobjecte.getName())==null){
+            this.objectes.add(vOobjecte);
+            logger.info("New Object added = "+vOobjecte);
 
-        if(findObject(t.getName())==null){
-            this.objectes.add(t);
-            logger.info("OBJECT ADDED "+t);
-            return t;
+            return vOobjecte;
         }
-        logger.info("this object already exists");
+        logger.info("Could not add new User bc it already exists user with that name");
+
         return null;
     }
 
 
     @Override
     public Objecte getObject(String name) {
-        logger.info("getting "+name);
+        logger.info("Getting "+name);
+
         for(Objecte o: this.objectes){
             if(o.getName().equals(name)){
-                logger.info("FOUND " + o);
+                logger.info("Found " + o);
                 return o;
             }
         }
-        logger.info("NOT FOUND " + name);
+        logger.info("Unfound Object " + name);
         return null;
     }
 
     @Override
-    public Objecte findObject(String name) {
-        for (Objecte ob : objectes)
-            if(name.equals(ob.getName())){
-                return ob;
-            }
-        return null;
+    public User getUser(String id) {
+        return this.users.get(id);
     }
 
-
-    public List<Objecte> findAllObjectes() {
+    public List<Objecte> getAllObjectes() {
         return this.objectes;
     }
 
-    @Override
-    public void deleteObject(String name) {
-        Objecte t = this.getObject(name);
-        if (t==null) {
-            logger.warn("not found ");
-        }
-        else logger.info(t+" deleted ");
 
-        this.objectes.remove(t);
-    }
 
 
     @Override
     public List<Objecte> sortNumObjectes() {
-        Collections.sort(objectes, (Objecte o1, Objecte o2)->Integer.compare(o1.getDsaCoins(),o2.getDsaCoins()));
-        //podria importar un comparable?
+        objectes.sort((Objecte o1, Objecte o2) -> Integer.compare(o2.getDsaCoins(),(o1.getDsaCoins())));
+
+        return this.objectes;
+    }
+    /*
+    @Override
+    public User updateUser(User t) {
         return null;
     }
+
+    @Override
+    public Objecte deleteObject(String name) {
+        Objecte t = this.getObject(name);
+        if (t==null) {
+            logger.warn("not found ");
+            return null;
+        }
+        else logger.info(t+" deleted ");
+
+        this.objectes.remove(t);
+        return t
+    }
+     */
+
 }

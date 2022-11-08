@@ -13,6 +13,13 @@ public class VOcredencials {
         this.setPassword(p);
     }
 
+    public VOcredencials (User u){
+        this();
+        this.setMail(u.getMail());
+        this.setPassword(u.getPassword());
+    }
+
+
     public String getMail() {
         return this.mail;
     }
@@ -29,6 +36,6 @@ public class VOcredencials {
 
     @Override
     public String toString() {
-        return "password=" + password +" mail =" + mail +"]";
+        return "[password=" + password +" mail =" + mail +"]";
     }
 }
