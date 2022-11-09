@@ -14,8 +14,6 @@ public class ShopManagerImpl implements ShopManager {
     protected Map<String, User> users; //DNI
     protected List<Objecte> objectes;
 
-    protected Integer idActual;
-
     final static Logger logger = Logger.getLogger(ShopManagerImpl.class);
 
     ShopManagerImpl() {
@@ -125,6 +123,10 @@ public class ShopManagerImpl implements ShopManager {
 
     @Override
     public List<User> sortAlpha() {
+        if(sizeUsers()==0){
+            logger.info("Unavailable sort");
+            return null;
+        }
         List<User> list = new ArrayList<>(this.users.values());
 
         list.sort((User u1, User u2)-> {
@@ -241,6 +243,10 @@ public class ShopManagerImpl implements ShopManager {
 
     @Override
     public List<Objecte> sortNumObjectes() {
+        if(sizeObjectes()==0){
+            logger.info("Unavailable sort");
+            return null;
+        }
         objectes.sort((Objecte o1, Objecte o2) -> Integer.compare(o2.getDsaCoins(),(o1.getDsaCoins())));
 
         return this.objectes;
